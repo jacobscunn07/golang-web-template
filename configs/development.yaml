@@ -1,0 +1,7 @@
+connection_string:
+  user: postgres
+  password: postgres
+  host: pgsqldb
+  port: 5432
+  database: postgres
+http_port: 5000

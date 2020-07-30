@@ -1,0 +1,25 @@
+version: "2.4"
+services:
+  app:
+    container_name: app
+    image: app:latest
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      pgsqldb:
+        condition: service_healthy
+  pgsqldb:
+    container_name: pgsqldb
+    image: postgres:11.8
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
