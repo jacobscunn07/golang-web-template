@@ -6,11 +6,8 @@ import (
   _ "github.com/golang-migrate/migrate/v4/database/postgres"
   _ "github.com/golang-migrate/migrate/v4/source/file"
   "github.com/jacobscunn07/golang-web-template/internal/application"
-  "github.com/jacobscunn07/golang-web-template/pkg/mediator"
-  "log"
-
-  //"github.com/jacobscunn07/golang-web-template/internal/application"
   "github.com/jacobscunn07/golang-web-template/internal/data"
+  "github.com/jacobscunn07/golang-web-template/pkg/mediator"
   "github.com/labstack/echo"
   "github.com/labstack/echo/middleware"
   "github.com/spf13/viper"
@@ -53,6 +50,9 @@ func Run() {
   defer db.Close()
 
   m := mediator.NewMediator()
+  m.Use(application.NewLoggingBehavior())
+  m.Use(application.NewTimerBehavior())
+
   m.Register(reflect.TypeOf(application.SayHelloCommand{}), application.NewSayHelloCommandHandler(db))
 
   // Echo instance
@@ -66,7 +66,6 @@ func Run() {
   e.GET("/", func(c echo.Context) error {
     var r application.SayHelloCommandResult
     m.Send(application.SayHelloCommand{Message: "hello"}, &r)
-    log.Println(r)
     return c.String(http.StatusOK, r.Result)
   })
 
