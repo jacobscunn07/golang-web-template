@@ -42,10 +42,7 @@ func (m *Mediator) Register(t reflect.Type, c IMediatorCommandHandler) {
 }
 
 func (m *Mediator) Send(c interface{}, ret interface{}) {
-  f := func() error {
-    return m.handlers[reflect.TypeOf(c).Name()].Handle(c, ret)
-  }
-  if err := m.behavior.Execute(f); err != nil {
+  if err := m.behavior.Execute(m.handlers[reflect.TypeOf(c).Name()], c, ret); err != nil {
     log.Fatal(err)
   }
 }

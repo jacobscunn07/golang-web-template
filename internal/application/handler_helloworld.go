@@ -12,7 +12,7 @@ type SayHelloCommand struct {
 
 // Result
 type SayHelloCommandResult struct {
-  Result string
+  Result string `json:"result"`
 }
 
 // Handler

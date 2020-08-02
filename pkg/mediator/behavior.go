@@ -1,7 +1,7 @@
 package mediator
 
 type Behavior interface {
-  Execute(func() error) error
+  Execute(h IMediatorCommandHandler, m interface{}, r interface{}) error
   SetNext(n Behavior)
   HasNext() bool
 }

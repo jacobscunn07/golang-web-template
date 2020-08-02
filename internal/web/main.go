@@ -11,12 +11,17 @@ import (
   "github.com/jacobscunn07/golang-web-template/pkg/mediator"
   "github.com/labstack/echo"
   "github.com/labstack/echo/middleware"
+  "github.com/sirupsen/logrus"
   "net/http"
   "reflect"
 )
 
 func Run() {
   configuration := configs.GetConfiguration()
+
+  logger := logrus.StandardLogger()
+  logger.SetFormatter(&logrus.JSONFormatter{})
+  logger.SetLevel(logrus.DebugLevel)
 
   data.Migrate(configuration.ConnectionString.ToString())
 
@@ -29,8 +34,7 @@ func Run() {
   defer db.Close()
 
   m := mediator.NewMediator()
-  m.Use(application.NewLoggingBehavior())
-  m.Use(application.NewTimerBehavior())
+  m.Use(application.NewLoggingBehavior(logger))
 
   m.Register(reflect.TypeOf(application.SayHelloCommand{}), application.NewSayHelloCommandHandler(db))
 

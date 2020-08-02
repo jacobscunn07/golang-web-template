@@ -1,76 +1,47 @@
 package application
 
 import (
+  "fmt"
   "github.com/jacobscunn07/golang-web-template/pkg/mediator"
-  "log"
+  "github.com/sirupsen/logrus"
 )
 
 type LoggingBehavior struct {
   next mediator.Behavior
+  logger *logrus.Logger
 }
 
-func NewLoggingBehavior() *LoggingBehavior {
-  return &LoggingBehavior{}
+func NewLoggingBehavior(logger *logrus.Logger) *LoggingBehavior {
+  return &LoggingBehavior{logger: logger}
 }
 
 func (b *LoggingBehavior) SetNext(n mediator.Behavior) {
   b.next = n
 }
 
-func (b *LoggingBehavior) Execute(f func() error) error {
-  log.Println("Entering Logging Behavior")
-  var r error
-  if b.next == nil {
-    log.Println("Executing command or query")
-    if err := f(); err == nil {
-      r = nil
-    } else {
-      r = err
-    }
-    log.Println("Finished executing command or query")
+func (b *LoggingBehavior) Execute(h mediator.IMediatorCommandHandler, m interface{}, r interface{}) error {
+  var err error = nil
+  if !b.HasNext() {
+    err = h.Handle(m, r)
   } else {
-    r = b.next.Execute(f)
+    err = b.next.Execute(h, m, r)
   }
 
-  log.Println("Exiting Logging Behavior")
-  return r
+  contextLogger := b.logger.
+    WithField("command_or_query_type", fmt.Sprintf("%T", m)).
+    WithField("command_or_query", m).
+    WithField("result_type", fmt.Sprintf("%T", r)).
+    WithField("result", r)
+
+  if err == nil {
+    contextLogger.Debug("command or query handled successfully")
+  } else {
+    contextLogger.Error("an error occurred: %v", err)
+  }
+
+  return err
 }
 
 func (b *LoggingBehavior) HasNext() bool {
-  return b.next != nil
-}
-
-type TimerBehavior struct {
-  next mediator.Behavior
-}
-
-func NewTimerBehavior() *TimerBehavior {
-  return &TimerBehavior{}
-}
-
-func (b *TimerBehavior) SetNext(n mediator.Behavior) {
-  b.next = n
-}
-
-func (b *TimerBehavior) Execute(f func() error) error {
-  log.Println("Entering Timer Behavior")
-  var r error
-  if b.next == nil {
-    log.Println("Executing command or query")
-    if err := f(); err == nil {
-      r = nil
-    } else {
-      r = err
-    }
-    log.Println("Finished executing command or query")
-  } else {
-    r = b.next.Execute(f)
-  }
-
-  log.Println("Exiting Timer Behavior")
-  return r
-}
-
-func (b *TimerBehavior) HasNext() bool {
   return b.next != nil
 }
