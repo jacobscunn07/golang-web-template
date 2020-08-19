@@ -55,3 +55,10 @@ func Run() {
   // Start server
   e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", configuration.HttpPort)))
 }
+
+
+// create database tables (embedded resources)
+// create domain objects
+// create repositories for aggregate roots
+// create mediator command / queries
+// implement validator and metric (prometheus) behaviors
