@@ -1,33 +1,82 @@
 package data_test
 
 import (
-  "github.com/go-pg/pg/v10"
-  "github.com/jacobscunn07/golang-web-template/internal/data"
-  "github.com/jacobscunn07/golang-web-template/internal/domain"
-  "testing"
+	"fmt"
+	"github.com/go-pg/pg/v10"
+	"github.com/google/uuid"
+	"github.com/jacobscunn07/golang-web-template/internal/data"
+	"github.com/jacobscunn07/golang-web-template/internal/domain"
+	"os"
+	"testing"
 )
 
-func TestRead_HappyPath(t *testing.T) {
-  t.Parallel()
-  db := pg.Connect(&pg.Options{
-    Addr:     "localhost:5432",
-    User:     "postgres",
-    Password: "postgres",
-    Database: "postgres",
-  })
-  defer db.Close()
+var DB *pg.DB
 
-  repository := data.NewToDoListRepository(db)
-  var todoList domain.ToDoList
-  if err := repository.Read("John", &todoList); err != nil {
-    t.Error(err)
-  }
+func TestMain(m *testing.M) {
+	DB = pg.Connect(&pg.Options{
+		Addr:     "localhost:5432",
+		User:     "postgres",
+		Password: "postgres",
+		Database: "postgres",
+	})
+	defer DB.Close()
+	exitVal := m.Run()
 
-  if todoList.Key == "" {
-   t.Error("Failed to find a TodoList with key ", "John")
-  }
+	os.Exit(exitVal)
+}
 
-  if len(todoList.TodoListItems) != 1 {
-    t.Error("Failed to retrieve TodoListItems for John TodoList")
-  }
+func TestSave(t *testing.T) {
+	tests := map[string]struct {
+		todoList domain.ToDoList
+		expected struct {
+			count int
+			err   error
+		}
+	}{
+		"simple": {
+			todoList: domain.ToDoList{
+				AggregateRoot: domain.AggregateRoot{Key: "simple"},
+				Id:            uuid.New().String(),
+				Name:          "Golang",
+				Description:   "learn golang",
+			},
+			expected: struct {
+				count int
+				err   error
+			}{count: 1, err: nil},
+		},
+		"simple w/ items": {
+			todoList: domain.ToDoList{
+				AggregateRoot: domain.AggregateRoot{Key: "simple-with-items"},
+				Id:            uuid.New().String(),
+				Name:          "Golang",
+				Description:   "learn golang",
+				TodoListItems: []*domain.ToDoListItem{{
+					Id:         uuid.New().String(),
+					Name:       "write go code",
+					IsComplete: false,
+				}},
+			},
+			expected: struct {
+				count int
+				err   error
+			}{count: 2, err: nil},
+		},
+	}
+
+	repository := data.NewToDoListRepository(DB)
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			count, err := repository.Save(&tc.todoList)
+
+			if count != tc.expected.count {
+				t.Errorf(fmt.Sprintf("Expected to effect %d rows, but only effected %d", tc.expected.count, count))
+			}
+
+			if err != tc.expected.err {
+				t.Errorf(fmt.Sprintf("Expected to get error of type %T, but got %T instead", tc.expected.err, err))
+			}
+		})
+	}
 }

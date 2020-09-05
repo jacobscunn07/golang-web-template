@@ -22,23 +22,6 @@ func NewToDoListRepository(db *pg.DB) *ToDoListRepository {
 }
 
 func (r *ToDoListRepository) Read(key string, object interface{}) error {
-  todoList, _ := object.(*domain.ToDoList)
-
-  if _, err := r.db.
-   Query(todoList, `SELECT id, key, name, description FROM todolist WHERE key = ?`, key);
-  err != nil {
-    return err
-  }
-
-  if _, err := r.db.
-   Query(&todoList.TodoListItems,
-     `SELECT name, is_complete FROM todolistitem WHERE todolist_id = ?`, todoList.Id);
-  err != nil {
-   return err
-  }
-
-  object = todoList
-
   return nil
 }
 
@@ -47,9 +30,51 @@ func (r *ToDoListRepository) Delete(key string) (int, error) {
 }
 
 func (r *ToDoListRepository) Exists(key string) (bool, error) {
-  return false, errors.New("")
+  return false, nil
 }
 
 func (r *ToDoListRepository) Save(object interface{}) (int, error){
-  return 0, errors.New("")
+  todoList, _ := object.(*domain.ToDoList)
+  count := 0
+
+  tx, err := r.db.Begin()
+  if err != nil {
+    return 0, err
+  }
+
+  result, err := tx.Exec(`
+    INSERT INTO todolist (
+    id,
+    key,
+    name,
+    description
+    )
+    VALUES (?, ?, ?, ?)`, todoList.Id, todoList.Key, todoList.Name, todoList.Description)
+  if err != nil {
+    return 0, err
+  }
+
+  count += result.RowsAffected()
+
+  for _, tdli := range todoList.TodoListItems {
+    result, err = tx.Exec(`
+    INSERT INTO todolistitem (
+    id,
+    todolist_id,
+    name,
+    is_complete
+    )
+    VALUES (?, ?, ?, ?)`, tdli.Id, todoList.Id, tdli.Name, tdli.IsComplete)
+    if err != nil {
+      return 0, err
+    }
+    count += result.RowsAffected()
+  }
+
+  err = tx.Commit()
+  if err != nil {
+    return 0, err
+  }
+
+  return count, nil
 }
