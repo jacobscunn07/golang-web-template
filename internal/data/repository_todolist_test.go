@@ -7,7 +7,8 @@ import (
 	"github.com/jacobscunn07/golang-web-template/internal/data"
 	"github.com/jacobscunn07/golang-web-template/internal/domain"
 	"os"
-	"testing"
+  "reflect"
+  "testing"
 )
 
 var DB *pg.DB
@@ -68,15 +69,20 @@ func TestSave(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+		  temp := tc.todoList
 			count, err := repository.Save(&tc.todoList)
 
 			if count != tc.expected.count {
-				t.Errorf(fmt.Sprintf("Expected to effect %d rows, but only effected %d", tc.expected.count, count))
+				t.Errorf(fmt.Sprintf("Expected to affect %d rows, but only affected %d", tc.expected.count, count))
 			}
 
 			if err != tc.expected.err {
 				t.Errorf(fmt.Sprintf("Expected to get error of type %T, but got %T instead", tc.expected.err, err))
 			}
+
+			if !reflect.DeepEqual(tc.todoList, temp) {
+			  t.Errorf("Expected todolist and actual were not equal")
+      }
 		})
 	}
 }

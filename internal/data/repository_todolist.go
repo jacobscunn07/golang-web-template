@@ -76,5 +76,7 @@ func (r *ToDoListRepository) Save(object interface{}) (int, error){
     return 0, err
   }
 
+  // Read back from database and set to object parameter memory address
+
   return count, nil
 }
