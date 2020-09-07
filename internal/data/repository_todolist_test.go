@@ -132,3 +132,49 @@ func TestExists(t *testing.T) {
     })
   }
 }
+
+func TestDelete(t *testing.T) {
+  tests := map[string]struct {
+    key string
+    save bool
+    expected struct {
+      count int
+      err error
+    }
+  }{
+    "simple": {
+      key: uuid.New().String(),
+      save: true,
+      expected: struct {
+        count int
+        err error
+      }{count: 1, err: nil},
+    },
+  }
+
+  repository := data.NewToDoListRepository(DB)
+
+  for name, tc := range tests {
+    t.Run(name, func(t *testing.T) {
+      if tc.save {
+        repository.Save(&domain.ToDoList{
+          AggregateRoot: domain.AggregateRoot{Key: tc.key},
+          Id:            uuid.New().String(),
+          Name:          uuid.New().String(),
+          Description:   uuid.New().String(),
+        })
+      }
+
+      count, err := repository.Delete(tc.key)
+      // TODO: Try to read todolist item with key that was deleted - should not exist
+
+      if count != tc.expected.count {
+        t.Errorf(fmt.Sprintf("Expected to affect %d rows, but only affected %d", tc.expected.count, count))
+      }
+
+      if err != tc.expected.err {
+        t.Errorf(fmt.Sprintf("Expected to get error of type %T, but got %T instead", tc.expected.err, err))
+      }
+    })
+  }
+}

@@ -1,7 +1,6 @@
 package data
 
 import (
-  "errors"
   "github.com/go-pg/pg/v10"
   "github.com/jacobscunn07/golang-web-template/internal/domain"
 )
@@ -26,7 +25,22 @@ func (r *ToDoListRepository) Read(key string, object interface{}) error {
 }
 
 func (r *ToDoListRepository) Delete(key string) (int, error) {
-  return 0, errors.New("")
+  tx, err := r.db.Begin()
+  if err != nil {
+    return 0, err
+  }
+
+  result, err := tx.Exec(`DELETE FROM todolist WHERE key = ?`, key)
+  if err != nil {
+    return 0, err
+  }
+
+  err = tx.Commit()
+  if err != nil {
+    return 0, err
+  }
+
+  return result.RowsAffected(), nil
 }
 
 func (r *ToDoListRepository) Exists(key string) (bool, error) {
@@ -80,7 +94,7 @@ func (r *ToDoListRepository) Save(object interface{}) (int, error){
     return 0, err
   }
 
-  // Read back from database and set to object parameter memory address
+  // TODO: Read back from database and set to object parameter memory address
 
   return count, nil
 }
