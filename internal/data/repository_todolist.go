@@ -21,6 +21,17 @@ func NewToDoListRepository(db *pg.DB) *ToDoListRepository {
 }
 
 func (r *ToDoListRepository) Read(key string, object interface{}) error {
+  todolist := object.(*domain.ToDoList)
+  _, err := r.db.Query(todolist, `SELECT id, key, name, description FROM todolist where key = ?`, key)
+  if err != nil {
+    return err
+  }
+
+  _, err = r.db.Query(&todolist.TodoListItems, `SELECT id, name, is_complete FROM todolistitem WHERE todolist_id = ?`, todolist.Id)
+  if err != nil {
+    return err
+  }
+
   return nil
 }
 

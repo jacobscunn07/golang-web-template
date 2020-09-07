@@ -178,3 +178,52 @@ func TestDelete(t *testing.T) {
     })
   }
 }
+
+func TestRead(t *testing.T) {
+  tests := map[string]struct {
+    key string
+    save bool
+    expected struct {
+      count int
+      err error
+    }
+  }{
+    "simple": {
+      key: uuid.New().String(),
+      save: true,
+      expected: struct {
+        count int
+        err error
+      }{count: 1, err: nil},
+    },
+  }
+
+  repository := data.NewToDoListRepository(DB)
+
+  for name, tc := range tests {
+    t.Run(name, func(t *testing.T) {
+      expected := domain.ToDoList{
+        AggregateRoot: domain.AggregateRoot{Key: tc.key},
+        Id:            uuid.New().String(),
+        Name:          uuid.New().String(),
+        Description:   uuid.New().String(),
+        TodoListItems: []*domain.ToDoListItem{{
+         Id:         uuid.New().String(),
+         Name:       uuid.New().String(),
+         IsComplete: true,
+        }},
+      }
+
+      if tc.save {
+        repository.Save(&expected)
+      }
+
+      var actual domain.ToDoList
+      repository.Read(tc.key, &actual)
+
+      if !reflect.DeepEqual(actual, expected) {
+       t.Errorf("Expected todolist and actual were not equal")
+      }
+    })
+  }
+}
