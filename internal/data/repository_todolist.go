@@ -30,7 +30,11 @@ func (r *ToDoListRepository) Delete(key string) (int, error) {
 }
 
 func (r *ToDoListRepository) Exists(key string) (bool, error) {
-  return false, nil
+  var exists bool
+  if _, err := r.db.QueryOne(pg.Scan(&exists), `SELECT 1 FROM todolist WHERE key = ?`, key); err != nil {
+    return false, err
+  }
+  return exists, nil
 }
 
 func (r *ToDoListRepository) Save(object interface{}) (int, error){

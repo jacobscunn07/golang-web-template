@@ -86,3 +86,49 @@ func TestSave(t *testing.T) {
 		})
 	}
 }
+
+func TestExists(t *testing.T) {
+  tests := map[string]struct {
+    key string
+    save bool
+    expected struct {
+      exists bool
+    }
+  }{
+    "simple exists": {
+      key: uuid.New().String(),
+      save: true,
+      expected: struct {
+        exists bool
+      }{exists: true},
+    },
+    "simple does not exist": {
+      key: uuid.New().String(),
+      save: false,
+      expected: struct {
+        exists bool
+      }{exists: false},
+    },
+  }
+
+  repository := data.NewToDoListRepository(DB)
+
+  for name, tc := range tests {
+    t.Run(name, func(t *testing.T) {
+      if tc.save {
+        repository.Save(&domain.ToDoList{
+          AggregateRoot: domain.AggregateRoot{Key: tc.key},
+          Id:            uuid.New().String(),
+          Name:          uuid.New().String(),
+          Description:   uuid.New().String(),
+        })
+      }
+
+      exists, _ := repository.Exists(tc.key)
+
+      if exists != tc.expected.exists {
+        t.Errorf(fmt.Sprintf("Expected the todolist to exist with %v, but got %v", tc.expected.exists, exists))
+      }
+    })
+  }
+}
