@@ -12,7 +12,7 @@ type configuration struct {
 
 func GetConfiguration() *configuration {
   viper.SetConfigName("development")
-  viper.AddConfigPath("/app/configs")
+  viper.AddConfigPath("/dist/configs")
   viper.SetEnvPrefix("todo")
   viper.AutomaticEnv()
   viper.SetConfigType("yaml")

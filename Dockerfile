@@ -1,14 +1,24 @@
-FROM golang:1.14
+FROM golang:1.15.3-alpine3.12 as build
 
-RUN WORKDIRS="/app" && \
-        echo "Creating working directories: $WORKDIRS..." && \
-        mkdir -p $WORKDIRS && \
-        ls -laR $WORKDIRS
+WORKDIR /build
 
-WORKDIR /app
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
 COPY . .
 
-RUN go build ./cmd/web
+RUN go build -o main ./cmd/web/main.go
 
-ENTRYPOINT /app/web
+FROM golang:1.15.3-alpine3.12
+
+WORKDIR /dist
+
+RUN mkdir configs
+RUN mkdir migrations
+
+COPY --from=build /build/main .
+COPY --from=build /build/internal/data/migrations /dist/migrations
+COPY --from=build /build/configs /dist/configs
+
+CMD ["/dist/main"]

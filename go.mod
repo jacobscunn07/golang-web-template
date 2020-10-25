@@ -1,6 +1,6 @@
 module github.com/jacobscunn07/golang-web-template
 
-go 1.14
+go 1.15
 
 require (
 	github.com/go-pg/pg/v10 v10.0.0-beta.8

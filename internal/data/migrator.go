@@ -6,7 +6,7 @@ import (
 )
 
 func Migrate(databaseURL string) {
-  m, err := migrate.New("file:///app/internal/data/migrations",databaseURL)
+  m, err := migrate.New("file:///dist/migrations",databaseURL)
   if err != nil {
     log.Fatal(err)
   }
