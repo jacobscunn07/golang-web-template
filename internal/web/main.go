@@ -9,6 +9,7 @@ import (
   "github.com/jacobscunn07/golang-web-template/internal/application"
   "github.com/jacobscunn07/golang-web-template/internal/data"
   "github.com/jacobscunn07/golang-web-template/pkg/mediator"
+  "github.com/prometheus/client_golang/prometheus/promhttp"
   "github.com/sirupsen/logrus"
   "net/http"
   "reflect"
@@ -35,6 +36,8 @@ func Run() {
   m.Use(application.NewLoggingBehavior(logger))
 
   m.Register(reflect.TypeOf(application.SayHelloCommand{}), application.NewSayHelloCommandHandler(db))
+
+  http.Handle("/metrics", promhttp.Handler())
 
   http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
     fmt.Fprintf(w, "hello\n")
