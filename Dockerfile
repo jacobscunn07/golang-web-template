@@ -10,7 +10,7 @@ COPY . .
 
 RUN go build -o main ./cmd/web/main.go
 
-FROM golang:1.15.3-alpine3.12
+FROM alpine:3.12.1
 
 WORKDIR /dist
 
