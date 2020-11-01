@@ -2399,6 +2399,9 @@ data:
       sshPrivateKeySecret:
         name: github
         key: privateKey
+    - type: helm
+      url: https://kubernetes.github.io/ingress-nginx
+      name: nginx
 ---
 apiVersion: v1
 kind: ConfigMap

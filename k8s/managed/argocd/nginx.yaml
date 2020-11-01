@@ -1,3 +1,26 @@
+#apiVersion: argoproj.io/v1alpha1
+#kind: Application
+#metadata:
+#  name: nginx
+#  namespace: argocd
+#spec:
+#  destination:
+#    name: ''
+#    namespace: default
+#    server: 'https://kubernetes.default.svc'
+#  source:
+#    path: k8s/managed/nginx
+#    repoURL: 'git@github.com:jacobscunn07/golang-web-template.git'
+#    targetRevision: HEAD
+#    directory:
+#      recurse: true
+#  project: default
+#  syncPolicy:
+#    automated:
+#      prune: false
+#      selfHeal: false
+#    syncOptions: []
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -9,14 +32,21 @@ spec:
     namespace: default
     server: 'https://kubernetes.default.svc'
   source:
-    path: k8s/managed/nginx
-    repoURL: 'git@github.com:jacobscunn07/golang-web-template.git'
-    targetRevision: HEAD
-    directory:
-      recurse: true
+    path: ''
+    repoURL: 'https://kubernetes.github.io/ingress-nginx'
+    targetRevision: 3.7.1
+    chart: ingress-nginx
+    helm:
+      parameters:
+        - name: controller.admissionWebhooks.service.type
+          value: NodePort
+        - name: controller.service.nodePorts.http
+          value: '32080'
+        - name: controller.service.nodePorts.https
+          value: '32443'
   project: default
   syncPolicy:
     automated:
-      prune: false
-      selfHeal: false
+      prune: true
+      selfHeal: true
     syncOptions: []
