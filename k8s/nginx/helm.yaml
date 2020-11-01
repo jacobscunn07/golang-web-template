@@ -1,0 +1,11 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: nginx
+spec:
+  repo: https://kubernetes.github.io/ingress-nginx
+  chart: ingress-nginx
+  set:
+    controller.service.type: "NodePort"
+    controller.service.nodePorts.http: 32080
+    controller.service.nodePorts.https: 32443

@@ -52,27 +52,14 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: dotnet
+  annotations:
+    kubernetes.io/ingress.class: nginx
 spec:
   rules:
     - host: dotnet.localhost
       http:
         paths:
-          - backend:
+          - path: /
+            backend:
               serviceName: dotnet-svc
               servicePort: 80
-
----
-
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: argo
-  namespace: argocd
-spec:
-  rules:
-    - host: argo.localhost
-      http:
-        paths:
-          - backend:
-              serviceName: argocd-server
-              servicePort: 443
