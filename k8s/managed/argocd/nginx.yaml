@@ -9,7 +9,7 @@ spec:
     namespace: default
     server: 'https://kubernetes.default.svc'
   source:
-    path: k8s/nginx
+    path: k8s/managed/nginx
     repoURL: 'git@github.com:jacobscunn07/golang-web-template.git'
     targetRevision: HEAD
     directory:

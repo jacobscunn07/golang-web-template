@@ -2813,7 +2813,7 @@ spec:
     namespace: default
     server: 'https://kubernetes.default.svc'
   source:
-    path: k8s/argocd
+    path: k8s/managed/argocd
     repoURL: 'git@github.com:jacobscunn07/golang-web-template.git'
     targetRevision: HEAD
     directory:
