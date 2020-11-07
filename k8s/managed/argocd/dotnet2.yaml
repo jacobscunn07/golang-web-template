@@ -9,7 +9,7 @@ spec:
     namespace: dotnet
     server: 'https://kubernetes.default.svc'
   source:
-    path: k8s/managed/dotnet
+    path: k8s/managed/dotnet2
     repoURL: 'git@github.com:jacobscunn07/golang-web-template.git'
     targetRevision: HEAD
     directory:
